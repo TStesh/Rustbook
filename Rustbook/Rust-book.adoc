@@ -1,0 +1,46 @@
+= Язык программирования Rust
+Steve Klabnik и Carol Nichols, при участии сообщества Rust
+:doctype: book
+:icons: font
+:icon-set: far
+:autofit-option:
+:optimize: screen
+:source-highlighter: rogue
+:pdf-theme: rb
+:pdf-fontsdir: c:\windows\fonts
+:experimental:
+
+Актуальная версия и документация
+
+В книге предполагается, что используется Rust 1.62 (дата релиза 2022-06-30) или выше. Для установки или обновления Rust см. раздел xref:_1_1_installation[«1.1 Установка»] Главы 1.
+
+Книга доступна в формате HTML:
+
+* Онлайн по ссылке: _https://doc.rust-lang.org/stable/book/_
+* Локально из инсталляции Rust: чтобы открыть документ, выполните в консоли команду
+
+ rustup docs --book
+
+include::rb-foreword.adoc[]
+
+include::rb-introduction.adoc[]
+
+include::rb-1-getting-started.adoc[]
+
+include::rb-2-guessing-game.adoc[]
+
+include::rb-3-common-programming.adoc[]
+
+include::rb-4-ownership.adoc[]
+
+include::rb-5-structures.adoc[]
+
+include::rb-6-enums-and-pattern-matching.adoc[]
+
+include::rb-7-packages-modules.adoc[]
+
+include::rb-8-common-collections.adoc[]
+
+include::rb-9-error-handling.adoc[]
+
+include::rb-10-generics-traits-lifetimes.adoc[]

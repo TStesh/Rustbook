@@ -1,0 +1,187 @@
+[#_2_4_looping]
+=== 2.4. Обработка более чем одного числа игрока с помощью циклов
+
+Ключевое слово `loop` создает бесконечный цикл. Мы добавим цикл, чтобы дать пользователям больше шансов угадать число:
+
+Файл: src/main.rs
+
+[source,rust]
+----
+    // --snip--
+
+    println!("The secret number is: {secret_number}");
+
+    loop {
+        println!("Please input your guess.");
+
+        // --snip--
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => println!("You win!"),
+        }
+    }
+}
+----
+
+Как видите, мы переместили все, начиная с подсказки ввода с предположением, в тело цикла. Не забудьте сделать отступ для строк внутри цикла еще на четыре пробела и снова запустите программу. Поведение программы изменилось: теперь она будет всегда запрашивать у пользователя число, что фактически создает новую проблему: не похоже, что пользователь может выйти!
+
+Однако прервать выполнение такой программы все-таки можно, применяя комбинацию клавиш kbd:[Ctrl+C]. Есть и другой способ прерывания бесконечного цикла: как упоминалось в обсуждении `parse` в разделе «Сравнение числа игрока с секретным числом», если ввод содержит нечисловую строку, то программа аварийно завершает работу. Мы можем этим воспользоваться, чтобы позволить пользователю выйти, как показано здесь:
+
+[example]
+----
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished dev [unoptimized + debuginfo] target(s) in 1.50s
+     Running `target/debug/guessing_game`
+Guess the number!
+The secret number is: 59
+Please input your guess.
+45
+You guessed: 45
+Too small!
+Please input your guess.
+60
+You guessed: 60
+Too big!
+Please input your guess.
+59
+You guessed: 59
+You win!
+Please input your guess.
+quit
+thread 'main' panicked at 'Please type a number!: ParseIntError { kind: InvalidDigit }', src/main.rs:28:47
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+----
+
+Для аварийного завершения программы мы ввели "quit" (как один из вариантов нечислового ввода). Это не оптимально, если не сказать больше; также мы хотим, чтобы игра останавливалась, когда пользователь вводит правильное число.
+
+==== Завершение программы после ввода правильного числа
+
+Давайте запрограммируем игру на выход в случае ввода пользователем правильного числа, для чего используем инструкцию `break`:
+
+Файл: src/main.rs
+
+[source,rust]
+----
+        // --snip--
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
+    }
+}
+----
+
+Добавление `break` после `"You win!"` заставляет программу выйти из цикла, когда пользователь угадывает секретное число. Выход из цикла также означает выход из программы, потому что цикл является последней частью функции `main`.
+
+==== Обработка неверного ввода
+
+Для улучшения поведения игры, давайте сделаем так, чтобы программа вместо сбоя программы при вводе пользователем нечисловой строки игнорировала этот ввод и позволяла пользователю продолжить игру. Мы можем сделать это, изменив строку, в которой `guess` преобразуется из строчного значения в `u32`, как показано в листинге 2-5.
+
+--
+.Листинг 2-5. Игнорирование guess, отличного от числа, и запрос другого guess вместо сбоя программы
+
+Файл: src/main.rs
+
+[source,rust]
+----
+        // --snip--
+
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+        println!("You guessed: {guess}");
+
+        // --snip--
+----
+--
+
+Мы заменили `expect` на выражение `match`, чтобы в случае ошибки перейти от аварийного завершения программы к обработке ошибки. Напомним, что `parse` возвращает тип `Result`, а `Result` — это перечисление с вариантами `Ok` и `Err`. Далее используем выражение `match` так же, как в случае обработки результата `Ordering` метода `cmp`.
+
+Если `parse` может успешно преобразовать строку в число, то вернет значение `Ok`, содержащее полученное число. Значение `Err` не соответствует образцу `Ok(num)` в первой ветке сопоставления, но соответствует образцу `+Err(_)+` во второй ветке. Символ подчеркивания `+_+` обозначает "любое значение"; в этом примере мы говорим, что хотим принять произвольный `Err`, независимо от того, какое значение в нем содержится. Таким образом, программа выполнит код второй ветки, инструкцию `continue`, которая прерывает текущую итерацию цикла и немедленно начинает новую; снова начинается запрос пользовательского ввода. В итоге программа фактически игнорирует все ошибки, которые могут возникнуть при выполнении метода `parse`!
+
+Теперь наш код должен работать как положено:
+
+[example]
+----
+$ cargo run
+   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
+    Finished dev [unoptimized + debuginfo] target(s) in 4.45s
+     Running `target/debug/guessing_game`
+Guess the number!
+The secret number is: 61
+Please input your guess.
+10
+You guessed: 10
+Too small!
+Please input your guess.
+99
+You guessed: 99
+Too big!
+Please input your guess.
+foo
+Please input your guess.
+61
+You guessed: 61
+You win!
+----
+
+Потрясающе! С этим небольшим изменением мы закончили разработку игры в угадайку. Напомним, что программа все еще печатает секретный номер. Как мы уже говорили — это хорошо для тестирования, но портит игру. Давайте удалим `println!`, который выводит секретный номер. В листинге 2-6 показан окончательный код.
+
+--
+.Листинг 2-6: Полный код игры в угадайку
+
+Файл: src/main.rs
+
+[source,rust]
+----
+use rand::Rng;
+use std::cmp::Ordering;
+use std::io;
+
+fn main() {
+    println!("Guess the number!");
+
+    let secret_number = rand::thread_rng().gen_range(1..=100);
+
+    loop {
+        println!("Please input your guess.");
+
+        let mut guess = String::new();
+
+        io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+        println!("You guessed: {guess}");
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
+                break;
+            }
+        }
+    }
+}
+----
+--

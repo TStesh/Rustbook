@@ -1,0 +1,25 @@
+extends: default-with-font-fallbacks
+role:
+  st:
+    font_family: calibri
+    font_color: 009999
+    font_style: bold
+    font_size: 1.1em
+font:
+  catalog:
+    merge: true
+    calibri:
+      normal: calibri.ttf
+      italic: calibrii.ttf
+      bold: calibrib.ttf
+      bold_italic: calibriz.ttf
+codespan:
+  font_color: 009999
+  font_style: bold
+  font_size: 1em
+example:
+  font_size: 10
+quote:
+  font_size: 10
+quote-cite:
+  font_size: 10
